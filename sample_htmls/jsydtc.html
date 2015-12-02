@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title></title>
+<style>
+body {margin:0;color:#000;overflow:hidden;padding:0;height:100%;font-family:Arial}
+a{cursor:pointer;display:block;position:absolute;border:1px;border-radius:1em;background-color:#fff;color:#333; opacity:.8;z-index:3;right:2px;top:50%;margin-top:-10px;line-height:20px;text-align:center;width:20px;font-size:14px}
+#x{position:fixed;z-index:2;bottom:0px;width:100%;height:60px}
+#i{display:block; position:absolute; z-index:1; width:100%; height:100%}
+</style>
+</head>
+<body style='background-color:transparent; margin:0px; height:100%'>
+<div id=i>
+	<iframe id='m' name='m' width='100%' height='100%' frameborder='0'  ></iframe>
+</div>
+<div id=x style='position:fixed;z-index:2;right:0px;bottom:0px;width:100%;height:60px'>
+<a onClick='x.style.display="none"'>X</a>
+	<iframe src="http://dmp.jiusuirenyuan.com/ad/163.html?t=_t" width=100% height=60 scrolling=no frameborder=0 style='border:0px none;display:block'></iframe>
+</div>
+<script>
+(function () {
+	var d = document;
+	var f = "http://www.sohu.com/";
+	var ua = navigator.userAgent.toLowerCase();
+	var im = d.getElementById("m");
+	im.src = f + (f.indexOf("&") < 0 ? '?' : '&') + 'rsv_upd';
+	if (ua.indexOf("iphone") > 0) {
+			im.width=window.innerWidth;
+			im.scrolling="no";
+	};	
+})();
+</script>
+
+</body>
+</html>
