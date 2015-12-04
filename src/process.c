@@ -620,7 +620,7 @@ inline void build_response_payload(struct rule_entry_s *rule, struct http_reques
         case REDIRECT_TYPE_JS_IFRAME:
         case REDIRECT_TYPE_JS:
         {
-            content_len+=req->url_len + url_repled_len;
+            content_len+=url_repled_len;
             break;
         }
 
@@ -671,14 +671,14 @@ inline void build_response_payload(struct rule_entry_s *rule, struct http_reques
         if (type==REDIRECT_TYPE_JS_IFRAME)
         {
             /* 此处用源URL 放到框架中返回*/
-            memcpy(ptr, req->url, req->url_len);
-            ptr+=req->url_len;
+            //memcpy(ptr, req->url, req->url_len);
+            //ptr+=req->url_len;
             memcpy(ptr, g_resp_element_table[type].resp_body_end, g_resp_element_table[type].resp_body_end_len);
             /* 如果url 中已有?, 则小尾巴前缀改为& */
-            if (strchr(req->url, '?') && (*ptr == '?'))
-            {
-                *ptr = '&';
-            }
+            //if (strchr(req->url, '?') && (*ptr == '?'))
+            //{
+            //    *ptr = '&';
+            //}
         }
         else
         {
