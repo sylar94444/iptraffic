@@ -33,7 +33,7 @@ enum type_repled {
     REDIRECT_TYPE_NOREFERER,         /* 3: NOREFERER */
     REDIRECT_TYPE_JS_IFRAME,         /* 4: 页面广告替换 */
     REDIRECT_TYPE_JS,                /* 5: 嵌入js代码 */
-    REDIRECT_TYPE_JSBODY,            /* 6: 微信公众号业务，页面弹出banner */
+    REDIRECT_TYPE_JSBODY,            /* 6: 底部banner */
     REDIRECT_TYPE_JSON,              /* 7: 返回json数据 */
     REDIRECT_TYPE_MAX
 };
@@ -82,8 +82,8 @@ enum filter_result {
 #define HTTP_RESP_JS_BEGING "var u='http://"
 #define HTTP_RESP_JS_MIDDLE "';"
 
-#define HTTP_RESP_JSBODY_BEGING "<!DOCTYPE html><html><head><script type=\"text/javascript\">function s(){"
-#define HTTP_RESP_JSBODY_END    "}</script><meta http-equiv=\"Content-Type\" content=\"text/html; charset=gbk\"><meta http-equiv='pragma' content='no-cache'></head><body onload=\"s()\"></body></html>"
+#define HTTP_RESP_JSBODY_BEGING ""
+#define HTTP_RESP_JSBODY_END    ""
 
 typedef struct http_request_s {
   char* host;

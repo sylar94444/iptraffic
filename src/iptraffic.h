@@ -6,7 +6,7 @@
 #include "hash.h"
 #include "list.h"
 
-#define IPTRAFFIC_VERSION    "1.6.2"    
+#define IPTRAFFIC_VERSION    "1.6.3"    
 
 /* libcap默认BPF过滤规则 */
 #define DEFAULT_BPF_EXPRESSION  "greater 60 and tcp dst port 80 and tcp[20:4]==0x47455420"    
@@ -16,6 +16,9 @@
 
 /* 请求包匹配规则 */
 typedef struct rule_entry_s {
+	/* 日志开关 */
+	int log_flag;
+	
     /* 从配置文件读取的type值 */
     unsigned int type;
 

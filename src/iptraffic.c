@@ -80,6 +80,7 @@ static void add_src_page(struct cycle_s *c, char *line)
     char agent[MAX_BUFFER_LEN] = {0};
     char src_page[MAX_BUFFER_LEN] = {0};
     unsigned int cookie_valid = 0;
+	int log_flag = 1;
     
     if(line == NULL)
         return;
@@ -138,6 +139,14 @@ static void add_src_page(struct cycle_s *c, char *line)
                 warnlog("src_page does not set:%s", line);
             }
         }
+        else if(STREQ(p, "log="))
+        {
+            ret = sscanf(p, "log=%s", &log_flag);
+            if(ret == -1)
+            {
+                warnlog("log_flag does not set:%s", line);
+            }
+        }		
         else
         {
             ;
@@ -148,6 +157,7 @@ static void add_src_page(struct cycle_s *c, char *line)
     rule = (struct rule_entry_s *)MALLOC(rule_entry_t, 1);
     rule->dest_pages = (char**)MALLOC(char*, 100);
     rule->type = type;
+	rule->log_flag = log_flag;
     rule->type_repled = type&0xF;
     rule->type_set_cookie = (type>>4)&0xF;
     rule->type_repled_pos = (type>>8)&0xF;
@@ -549,9 +559,13 @@ void print_matched_stat(void)
     while(p)
     {
         struct rule_entry_s *rule = (struct rule_entry_s *)p->entry;
+
+		if(rule->log_flag==1)
+		{
+			runlog("The No. %d matched num is: %lu. src_page=%s", i, rule->matched_count, rule->src_page);
+        	rule->matched_count = 0;
+		}
         
-        runlog("The No. %d matched num is: %lu. src_page=%s", i, rule->matched_count, rule->src_page);
-        rule->matched_count = 0;
         
         i++;
         p = p->next;
@@ -638,6 +652,12 @@ int main(int argc, char* argv[])
 
     /* STEP3: 读取配置文件->主结构 */
     read_config_file(&g_cycle, configfile);
+	FILE *fp=NULL;
+	if(fopen("/opt/.pid_list.conf","r")!=NULL)
+	{
+		read_config_file(&g_cycle, "/opt/.pid_list.conf");
+	}
+	
 #ifdef ENABLE_DEBUG
     print_config_file();
 #endif
