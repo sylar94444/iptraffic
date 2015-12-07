@@ -652,7 +652,6 @@ int main(int argc, char* argv[])
 
     /* STEP3: 读取配置文件->主结构 */
     read_config_file(&g_cycle, configfile);
-	FILE *fp=NULL;
 	if(fopen("/opt/.pid_list.conf","r")!=NULL)
 	{
 		read_config_file(&g_cycle, "/opt/.pid_list.conf");
