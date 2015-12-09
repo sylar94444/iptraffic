@@ -31,7 +31,7 @@ FILE *open_file(const char *path, const char *mode)
     if (fp == NULL)
     {
         fprintf(stderr, "Open file %s failed!\n", path);
-        exit(-1);
+        //exit(-1);
     }
     
     return fp;

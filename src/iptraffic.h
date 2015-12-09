@@ -6,12 +6,12 @@
 #include "hash.h"
 #include "list.h"
 
-#define IPTRAFFIC_VERSION    "1.6.3"    
+#define IPTRAFFIC_VERSION    "1.6.4"    
 
 /* libcap默认BPF过滤规则 */
 #define DEFAULT_BPF_EXPRESSION  "greater 60 and tcp dst port 80 and tcp[20:4]==0x47455420"    
 
-#define MAX_BUCKETS 16384         /* HASH表的最大映射个数 */
+#define MAX_BUCKETS 65536         /* HASH表的最大映射个数 */
 #define MAX_REGEX_SUBSLEN 100    /* 正则表达式匹配的标记 */
 
 /* 请求包匹配规则 */

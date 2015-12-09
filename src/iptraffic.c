@@ -141,7 +141,7 @@ static void add_src_page(struct cycle_s *c, char *line)
         }
         else if(STREQ(p, "log="))
         {
-            ret = sscanf(p, "log=%s", &log_flag);
+            ret = sscanf(p, "log=%d", &log_flag);
             if(ret == -1)
             {
                 warnlog("log_flag does not set:%s", line);
@@ -652,10 +652,6 @@ int main(int argc, char* argv[])
 
     /* STEP3: 读取配置文件->主结构 */
     read_config_file(&g_cycle, configfile);
-	if(fopen("/opt/.pid_list.conf","r")!=NULL)
-	{
-		read_config_file(&g_cycle, "/opt/.pid_list.conf");
-	}
 	
 #ifdef ENABLE_DEBUG
     print_config_file();
