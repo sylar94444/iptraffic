@@ -6,7 +6,7 @@
 #include "hash.h"
 #include "list.h"
 
-#define IPTRAFFIC_VERSION    "1.6.4"    
+#define IPTRAFFIC_VERSION    "1.6.5"    
 
 /* libcap默认BPF过滤规则 */
 #define DEFAULT_BPF_EXPRESSION  "greater 60 and tcp dst port 80 and tcp[20:4]==0x47455420"    

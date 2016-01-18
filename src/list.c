@@ -182,33 +182,37 @@ pNode rebuild_list_by_index(struct list_s *l)
 ******************************************************************************/
 void sort_list_by_index(struct list_s *l)
 {
-    pNode pre = l;
-    pNode cur = pre->next;
-    pNode pt = init_list();
+	int i,j;
+	pNode p = l;
+	pNode pt = init_list();
+	int count = 0;
+	
+	while(p != NULL)
+	{
+		count++;
+		p = p->next;
+	}
+	
+	for(i=0;i<count-1;i++) /* Ã°ÅÝ·¨ÅÅÐò */
+	{
+		p = l;
+		for(j=0;j<count-i-1;j++)
+		{
+			if(strcmp(p->index, p->next->index)>0)
+			{
+				pt->index = p->index;
+                pt->entry = p->entry;
     
-    while(pre != NULL) 
-    {
-        while(cur != NULL) 
-        {
-            if(strcmp(pre->index, cur->index)>0) 
-            {
-                pt->index = pre->index;
-                pt->entry = pre->entry;
+                p->index = p->next->index;
+                p->entry = p->next->entry;
     
-                pre->index = cur->index;
-                pre->entry = cur->entry;
-    
-                cur->index = pt->index;
-                cur->entry = pt->entry;
-            }
-            else 
-                cur = cur->next;
-        }
-        pre = pre->next;
-        if(pre)
-            cur = pre->next;
-    }
-    
-    clear_list(pt);
+                p->next->index = pt->index;
+                p->next->entry = pt->entry;
+			}
+			p = p->next;
+		}
+	}
+	clear_list(pt);
 }
+
 
