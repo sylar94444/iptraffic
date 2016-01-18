@@ -7,9 +7,19 @@ static char logbuf[MAX_BUFFER_LEN];     /* GLOBAL */
 void open_log(const char *path)
 {
     if(path)
+    {
         logfp = open_file(path, "a");
+    }
     else
+    {
         logfp = open_file(DEFAULT_LOGFILE, "a");
+    }
+
+    if (logfp == NULL)
+    {
+        fprintf(stderr, "Open log file %s failed!\n", path);
+        exit(-1);
+    }
 }
 
 void close_log(void)

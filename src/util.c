@@ -25,16 +25,20 @@ void free_buf(void *p)
 
 FILE *open_file(const char *path, const char *mode)
 {
+    /*************************
     FILE *fp = NULL;
     
     fp = fopen(path, mode);
+    
     if (fp == NULL)
     {
         fprintf(stderr, "Open file %s failed!\n", path);
-        //exit(-1);
+        exit(-1);
     }
-    
+        
     return fp;
+    **************************/
+    return fopen(path, mode);
 }
 
 void close_file(FILE *fp)

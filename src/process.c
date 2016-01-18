@@ -799,8 +799,10 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
 
     ip_hdr = (struct iphdr*)cp;
 	cp+=(ip_hdr->ihl*4);
-	//UDP报头
-	if(ip_hdr->protocol == 0x11)
+
+#ifdef HAVE_UDPGRE_HEADER
+	//UDP报头 或者 GRE报头，都为8字节
+	if(ip_hdr->protocol == 0x11 || ip_hdr->protocol == 0x2f)
 	{
 		cp+=8;
 		//GPRS报头
@@ -820,7 +822,8 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
 		ip_hdr = (struct iphdr*)cp;
 		cp+=(ip_hdr->ihl*4);
 	}
-    
+#endif
+
     tcp_hdr = (struct tcphdr*)cp;
     cp+=(tcp_hdr->doff*4);
 

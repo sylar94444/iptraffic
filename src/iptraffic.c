@@ -265,6 +265,12 @@ static void read_white_list(struct cycle_s *c, const char *path)
     int flag = 0;
 
     fp = open_file(path, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Open whitelist file %s failed!\n", path);
+        return;
+    }
+    
     while (fgets(line, sizeof (line), fp))
     {
         char *cp = ignore_space(line);
@@ -426,6 +432,12 @@ void read_config_file(struct cycle_s *c, const char *path)
     char line[MAX_BUFFER_LEN] = {0};
 
     fp = open_file(path, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Open config file %s failed!\n", path);
+        return;
+    }
+    
     while (fgets(line, sizeof(line), fp))
     {
         parse_line (c, line);
@@ -564,10 +576,8 @@ void print_matched_stat(void)
 		{
 			runlog("The No. %d matched num is: %lu. src_page=%s", i, rule->matched_count, rule->src_page);
         	rule->matched_count = 0;
+            i++;
 		}
-        
-        
-        i++;
         p = p->next;
     }
     runlog("---------------------------------------------------");
