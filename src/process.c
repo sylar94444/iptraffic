@@ -137,6 +137,8 @@ struct http_request_s* http_new_request(void)
     r->user_agent_len = 0;
     r->cookie = (char *)MALLOC(char, MAX_COOKIE_LEN);
     r->cookie_len = 0;
+	r->saddr_str = (char *)MALLOC(char, 16);
+    r->daddr_str = (char *)MALLOC(char, 16);
  
     return r;
 }
@@ -757,6 +759,22 @@ struct rule_entry_s * match_rules_repled(struct http_request_s* r, struct list_s
     return NULL;
 }
 
+void dcenter_udp_packet(http_request_t* req)
+{   
+    g_cycle.length = sprintf(g_cycle.buffer, "%s\t%s\t%s\thttp://%s\t%s\t%s\t%s\n", req->saddr_str, req->daddr_str, req->host, req->url, req->referer, req->user_agent, req->cookie);
+   
+	/* send data */
+	struct sockaddr_in sockaddr;
+	sockaddr.sin_family = AF_INET;
+	sockaddr.sin_port = htons(g_cycle.szport);
+	sockaddr.sin_addr.s_addr = inet_addr(g_cycle.szhost);
+
+	if (sendto(g_cycle.sock_fd, g_cycle.buffer, g_cycle.length, 0,(struct sockaddr *)&sockaddr,sizeof(sockaddr)) == -1)
+	{
+		warnlog("Send UDP packet failed!");
+	}  
+}
+
 void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const unsigned char* packet)
 {
     int rtn = IPTRAFFIC_FUNC_SUCCESS;
@@ -796,6 +814,9 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
             return;
         }
     }
+
+    /* IP header */
+	struct ip *ip = (void *) cp;
 
     ip_hdr = (struct iphdr*)cp;
 	cp+=(ip_hdr->ihl*4);
@@ -880,6 +901,16 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
     {
         return;
     }
+
+    //收集数据，UDP实时返回指定服务器
+	if(rule->type == REDIRECT_TYPE_RECORD)
+	{
+        ip_buf_ntos(req->saddr_str, ntohl(ip->ip_src.s_addr));
+        ip_buf_ntos(req->daddr_str, ntohl(ip->ip_dst.s_addr));
+		dcenter_udp_packet(req);
+
+	    return;
+	}
 
 #ifndef ENABLE_STAT_ONLY
     /* 生成替换后的链接*/

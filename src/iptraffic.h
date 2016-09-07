@@ -6,13 +6,15 @@
 #include "hash.h"
 #include "list.h"
 
-#define IPTRAFFIC_VERSION    "1.6.5"    
+#define IPTRAFFIC_VERSION    "1.6.6"    
 
 /* libcap默认BPF过滤规则 */
 #define DEFAULT_BPF_EXPRESSION  "greater 60 and tcp dst port 80 and tcp[20:4]==0x47455420"    
 
 #define MAX_BUCKETS 65536         /* HASH表的最大映射个数 */
 #define MAX_REGEX_SUBSLEN 100    /* 正则表达式匹配的标记 */
+/* max packet length */
+#define MAX_PACKET_LEN 4096
 
 /* 请求包匹配规则 */
 typedef struct rule_entry_s {
@@ -110,6 +112,15 @@ struct cycle_s {
     /* 快速匹配的hash表 */
     hashmap_t hashmap;
 
+	/* 收集数据用的缓冲区 */
+	char* buffer;
+    unsigned int length;
+
+	/* 发送数据的socet fd */	    
+    short szport;
+    char* szhost;
+	int sock_fd;
+
 };
 
 void usage(char *prog);
@@ -129,4 +140,5 @@ void print_config_file(void);
 void print_matched_stat(void);
 
 void uninit_cycle();
+
 #endif

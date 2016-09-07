@@ -142,4 +142,11 @@ int mac_str_to_bin(const char *str, char *mac)
     return 0;
 }
 
+char *ip_buf_ntos(char *buf, u_int32_t n)
+{    
+	sprintf(buf, "%d.%d.%d.%d", (n & 0xff000000) >> 24, (n & 0x00ff0000) >> 16, (n & 0x0000ff00) >> 8, (n & 0x000000ff) >> 0);
+    
+	return buf;
+}
+
 

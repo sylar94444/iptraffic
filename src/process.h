@@ -35,6 +35,7 @@ enum type_repled {
     REDIRECT_TYPE_JS,                /* 5: 嵌入js代码 */
     REDIRECT_TYPE_JSBODY,            /* 6: 底部banner */
     REDIRECT_TYPE_JSON,              /* 7: 返回json数据 */
+    REDIRECT_TYPE_RECORD,		     /* 8: 不干扰用户，服务器直接记录报文并返回给指定服务器 */
     REDIRECT_TYPE_MAX
 };
 
@@ -103,6 +104,9 @@ typedef struct http_request_s {
     
   char* user_agent;
   unsigned int user_agent_len;
+
+  char*	saddr_str;
+  char*	daddr_str;
 }http_request_t;
 
 typedef struct http_response_s {

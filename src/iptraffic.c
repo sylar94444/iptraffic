@@ -411,6 +411,23 @@ parse_line (struct cycle_s *c, char *line)
             break;
         }
 #endif
+        else if(STREQ(p, "szhost="))
+        {
+            sscanf(p, "szhost=%s\n", buf);         
+            c->szhost = strdup(buf);
+            if(strlen(buf) <= 0)
+            {
+                warnlog("Send server host does not set, will be using default ip!");
+            }
+            break;
+        }
+        else if(STREQ(p, "szport="))
+        {
+        	short port = 0;
+            sscanf(p, "szport=%d", &port); 
+			c->szport = port;
+            break;
+        }		
         else
         {
             break;
@@ -478,6 +495,14 @@ void init_cycle(struct cycle_s *c)
 
     /* 快速匹配的hash表 */
     c->hashmap = hashmap_create(MAX_BUCKETS);
+
+	/* init buffer */
+    c->length = 0;
+	c->buffer = (char*)MALLOC(char, MAX_PACKET_LEN);
+    
+    /* init dcenter socket */
+	c->szhost = (char *)MALLOC(char, 32);
+    c->sock_fd = 0;  	
 }
 
 void uninit_cycle(struct cycle_s *c)
@@ -621,6 +646,11 @@ void load_hashmap()
     }
 }
 
+void dcenter_sock_udp_init(void)
+{
+	g_cycle.sock_fd= socket(AF_INET, SOCK_DGRAM, 0);
+}
+
 int main(int argc, char* argv[])
 {
     int opt;
@@ -686,6 +716,9 @@ int main(int argc, char* argv[])
     signal(SIGKILL, killer);
     signal(SIGUSR1, SignHandler1);
     signal(SIGUSR2, SignHandler2);
+
+	/* STEP9: 初始化收集数据socket */
+	dcenter_sock_udp_init();
 
     nice(-20);
     
