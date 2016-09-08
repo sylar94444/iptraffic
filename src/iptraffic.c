@@ -423,7 +423,7 @@ parse_line (struct cycle_s *c, char *line)
         }
         else if(STREQ(p, "szport="))
         {
-        	short port = 0;
+        	int port = 0;
             sscanf(p, "szport=%d", &port); 
 			c->szport = port;
             break;
@@ -518,9 +518,6 @@ void uninit_cycle(struct cycle_s *c)
           clear_list(c->rule_list);
       }
 
-    if(c->new_rule_list)
-        clear_list(c->new_rule_list);
-
     if(c->request)
         http_free_request(c->request);
 
@@ -608,42 +605,54 @@ void print_matched_stat(void)
     runlog("---------------------------------------------------");
 }
 
+
 void load_hashmap()
 {
-    struct list_s *list = g_cycle.rule_list;
-    struct list_s *new_list = g_cycle.new_rule_list;
+    struct list_s *p = g_cycle.rule_list;
     hashmap_t hash = g_cycle.hashmap;
     
-    /* host拆分为单个域名，重新建立新的链表 */
-    new_list = rebuild_list_by_index(list);
-
     /* 没有任何策略 */
-    if(!new_list)
+    if(!p)
         return;
-    
-    /* 以host为索引进行排序 */
-    sort_list_by_index(new_list);
-    
-    struct list_s *p =  new_list;
-    struct list_s *s = NULL;
-    struct list_s *head = new_list;
-    int len = 0;
-
-    //以host为关键字拆分链表，并送入hash表
+     
     while(p)
     {
-        s = p;
-        p = p->next;
-        len++;
-        if(!p||strcmp(s->index, p->index))
+        /* 忽略percent之和为零的规则节点 */
+        struct rule_entry_s *rule = (struct rule_entry_s *)p->entry;
+#ifndef ENABLE_STAT_ONLY
+        if((rule->percent == 0)||(rule->type==-1)||(strlen(p->index)<=0)||(strlen(rule->src_page)<=0))
+#else
+        if((rule->type==-1)||(strlen(p->index)<=0)||(strlen(rule->src_page)<=0))
+#endif
         {
-            s->next = NULL;
-            hashmap_insert(hash, s->index, head, len*sizeof(Node));
-            
-            head = p;
-            len = 0;
+            p = p->next;
+            continue;
         }
+
+        /* 开始处理有效规则，拆分->插入新链表 */
+        if(p->index && (strlen(p->index)>0))
+        {
+            char *index = NULL;
+            char *buf = strdup(p->index);
+        
+            while((index=strtok(buf,"|"))!=NULL)
+            {
+                pNode node = NULL;
+                
+                node = init_list();
+                node->index = strdup(index);
+                node->entry = p->entry;
+
+				hashmap_insert(hash, node->index, node, sizeof(Node));
+                
+                buf = NULL;
+            }
+        }
+        p = p->next;
     }
+
+
+	
 }
 
 void dcenter_sock_udp_init(void)

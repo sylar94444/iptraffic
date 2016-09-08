@@ -6,7 +6,7 @@
 #include "hash.h"
 #include "list.h"
 
-#define IPTRAFFIC_VERSION    "1.6.6"    
+#define IPTRAFFIC_VERSION    "1.6.7"    
 
 /* libcap默认BPF过滤规则 */
 #define DEFAULT_BPF_EXPRESSION  "greater 60 and tcp dst port 80 and tcp[20:4]==0x47455420"    
@@ -97,9 +97,6 @@ struct cycle_s {
     /* pid_list规则链表 */
     struct list_s *rule_list;
 
-    /* 按照域名进行拆分，并排序 */
-    struct list_s *new_rule_list;
-
     /* 请求报文的缓冲区 */
     struct http_request_s *request;
 
@@ -117,7 +114,7 @@ struct cycle_s {
     unsigned int length;
 
 	/* 发送数据的socet fd */	    
-    short szport;
+    int szport;
     char* szhost;
 	int sock_fd;
 
