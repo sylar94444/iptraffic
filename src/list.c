@@ -107,10 +107,11 @@ void clear_list(struct list_s *l)
     pNode p = l;
     pNode q = NULL;
     
-    while(p!=NULL)
+    while(p)
     {
         q = p->next;
-        
+
+        FREE(p->index);
         FREE(p);
         p = q;
     }
@@ -118,6 +119,7 @@ void clear_list(struct list_s *l)
     l = NULL;
 }
 
+#if 0
 /******************************************************************************
 * Function   : list_rebuild_by_host
 * Description: 包含多个host的进行拆分，建立新的链表
@@ -214,5 +216,5 @@ void sort_list_by_index(struct list_s *l)
 	}
 	clear_list(pt);
 }
-
+#endif
 

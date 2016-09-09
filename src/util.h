@@ -25,7 +25,5 @@ char *ignore_space(char *str);
 
 int mac_str_to_bin(const char *str, char *mac);
 
-char* ip_buf_ntos(char *buf, u_int32_t n);
-
 #endif
 

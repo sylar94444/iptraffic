@@ -137,8 +137,6 @@ struct http_request_s* http_new_request(void)
     r->user_agent_len = 0;
     r->cookie = (char *)MALLOC(char, MAX_COOKIE_LEN);
     r->cookie_len = 0;
-	r->saddr_str = (char *)MALLOC(char, 16);
-    r->daddr_str = (char *)MALLOC(char, 16);
  
     return r;
 }
@@ -183,6 +181,10 @@ int http_parse_get(struct http_request_s *r, unsigned char* data)
     r->referer_len = 0;
     r->cookie_len = 0;    
     r->user_agent_len = 0;
+
+    /* 非必须头域初始化为空 */
+    r->cookie[0] = '\0';
+    r->referer[0] = '\0';
     
     char* buf = (char *)data;
     char *sep = NULL;
@@ -299,6 +301,8 @@ int http_parse_get(struct http_request_s *r, unsigned char* data)
                     cnt++;
                 }
                 break;
+            default:
+                break;
         }
         
         if (flag == 1)
@@ -318,42 +322,30 @@ int http_parse_get(struct http_request_s *r, unsigned char* data)
 }
 
 #if 0
-static int http_detect_request_type(const char *uri, int uri_len)
+static inline int http_detect_request_type(const char *url, int url_len)
 {
-    char* buf = (unsigned char*)uri;
+    char* buf = NULL;
 	char *sep = NULL;
-    
-    buf = (unsigned char*)uri + uri_len - 3;
-    
+
+    //获取URL中最后一个问号位置
+	sep = strrchr(url, '?');
+	if (sep)
+    {
+        buf = sep - 4;
+    }
+    else
+    {
+        buf = (char*)url + url_len - 4;
+    }
+     
     //tar/gz/tgz/zip/Z/7z/rpm/deb/ps/dvi/pdf/smi/png/jpg/jpeg/bmp/tiff/gif/mov/avi/mpeg/mpg/mp3/qt/wav/ram/rm/rmvb/jar/java/class/diff/doc/docx/xls/ppt/mdb/rtf/exe/pps/so/psd/css/js/ico/dll/bz2/rar
-	if (!strncmp(buf, "gif", 3) || !strncmp(buf, ".js", 3) || !strncmp(buf, "jpg", 3) || !strncmp(buf, "png", 3)
-        || !strncmp(buf, "bmp", 3) || !strncmp(buf, "zip", 3) || !strncmp(buf, "rar", 3) || !strncmp(buf, "doc", 3)
-        || !strncmp(buf, "xls", 3) || !strncmp(buf, "swf", 3) || !strncmp(buf, "css", 3) || !strncmp(buf, "ico", 3)
-        || !strncmp(buf, "flv", 3) || !strncmp(buf, "exe", 3) || !strncmp(buf, "tar", 3) || !strncmp(buf, "dll", 3)
-        || !strncmp(buf, "tgz", 3) || !strncmp(buf, "rpm", 3) || !strncmp(buf, "avi", 3) || !strncmp(buf, "rtf", 3)
-        || !strncmp(buf, "xml", 3) || !strncmp(buf, "mpg", 3) || !strncmp(buf, "mp4", 3) || !strncmp(buf, "m4v", 3)
-        || !strncmp(buf, "ppt", 3) || !strncmp(buf, "psd", 3) || !strncmp(buf, "wmv", 3) || !strncmp(buf, "peg", 3))
-	{
-		return IPTRAFFIC_FUNC_ERROR;
-	}
-    
-	//detect URI
-	sep = strchr(uri, '.');
-	if (sep == 0)
-		return IPTRAFFIC_FUNC_SUCCESS;
-    
-	buf = sep + 1;
-	if (*buf == '\0' || *(buf + 1) == '\0')
-		return IPTRAFFIC_FUNC_SUCCESS;
-    
-	if (*(buf + 2) == '\0')
-		return IPTRAFFIC_FUNC_SUCCESS;
-    
-    //jpg/gif/png/bmp/zip/rar/doc/xls/swf/css/ico ---just match lower case
-	if (!strncmp(buf, "js", 2) || !strncmp(buf, "jpg", 3) || !strncmp(buf, "gif", 3) || !strncmp(buf, "png", 3)
-        || !strncmp(buf, "bmp", 3) || !strncmp(buf, "zip", 3) || !strncmp(buf, "rar", 3) || !strncmp(buf, "flv", 3)
-        || !strncmp(buf, "doc", 3) || !strncmp(buf, "css", 3) || !strncmp(buf, "swf", 3) || !strncmp(buf, "ico", 3)
-        || !strncmp(buf, "xml", 3))
+	if (!strncmp(buf, ".gif", 4) || !strncmp(buf, ".jpg", 4) || !strncmp(buf, ".png", 4) || !strncmp(buf, ".bmp", 4)
+        || !strncmp(buf, ".doc", 4) || !strncmp(buf, ".xls", 4) || !strncmp(buf, ".swf", 4) || !strncmp(buf, ".css", 4)
+        || !strncmp(buf, ".ico", 4) || !strncmp(buf, ".flv", 4) || !strncmp(buf, ".tar", 4) || !strncmp(buf, ".dll", 4)
+        || !strncmp(buf, ".tgz", 4) || !strncmp(buf, ".rpm", 4) || !strncmp(buf, ".avi", 4) || !strncmp(buf, ".rtf", 4)
+        || !strncmp(buf, ".xml", 4) || !strncmp(buf, ".mpg", 4) || !strncmp(buf, ".mp4", 4) || !strncmp(buf, ".m4v", 4)
+        || !strncmp(buf, ".ppt", 4) || !strncmp(buf, ".psd", 4) || !strncmp(buf, ".wmv", 4) || !strncmp(buf, ".peg", 4)
+        || !strncmp(buf, "xlsx", 4) || !strncmp(buf, "docx", 4) || !strncmp(buf, "pptx", 4))
 	{
 		return IPTRAFFIC_FUNC_ERROR;
 	}
@@ -759,9 +751,20 @@ struct rule_entry_s * match_rules_repled(struct http_request_s* r, struct list_s
     return NULL;
 }
 
-void dcenter_udp_packet(http_request_t* req)
-{   
-    g_cycle.length = sprintf(g_cycle.buffer, "%s\t%s\t%s\thttp://%s\t%s\t%s\t%s\n", req->saddr_str, req->daddr_str, req->host, req->url, req->referer, req->user_agent, req->cookie);
+void dcenter_udp_packet(struct iphdr* ip_hdr, http_request_t* req)
+{
+    unsigned int length = 0;
+    char buf[MAX_BUFFER_LEN] = {0};
+    struct in_addr ip;
+    ip.s_addr = ip_hdr->saddr;
+
+    if(NULL == g_cycle.szhost || 0 == g_cycle.szport)
+    {   
+        warnlog("The socket server is not configured.");
+        return;
+    }
+    
+    length = sprintf(buf, "%s\t%s\t%s\t%s\t%s\t%s\n", inet_ntoa(ip), req->host, req->uri, req->referer, req->user_agent, req->cookie);
    
 	/* send data */
 	struct sockaddr_in sockaddr;
@@ -769,7 +772,7 @@ void dcenter_udp_packet(http_request_t* req)
 	sockaddr.sin_port = htons(g_cycle.szport);
 	sockaddr.sin_addr.s_addr = inet_addr(g_cycle.szhost);
 
-	if (sendto(g_cycle.sock_fd, g_cycle.buffer, g_cycle.length, 0,(struct sockaddr *)&sockaddr,sizeof(sockaddr)) == -1)
+	if (sendto(g_cycle.sock_fd, buf, length, 0,(struct sockaddr *)&sockaddr,sizeof(sockaddr)) == -1)
 	{
 		warnlog("Send UDP packet failed!");
 	}  
@@ -790,7 +793,7 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
     
     /* only IP or PPP */
     u_int16_t ether_type = ntohs(eth_hdr->h_proto);
-    if( ether_type != 0x0800 && ether_type != 0x8100)
+    if(ether_type != 0x0800 && ether_type != 0x8100)
     {   
         return;
     }
@@ -816,8 +819,6 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
     }
 
     /* IP header */
-	struct ip *ip = (void *) cp;
-
     ip_hdr = (struct iphdr*)cp;
 	cp+=(ip_hdr->ihl*4);
 
@@ -884,11 +885,11 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
 #endif   
 
     /* 依据host为关键字在hash表中搜寻规则 */            
-    hashmap_entry_by_key(g_cycle.hashmap, req->host, (void **)&l);
+    hashmap_entry_by_key(g_cycle.hashmap, req->host, &l);
     if (NULL == l)
     {
         /* 根据host关键字未找到相应的规则，在默认规则中第二次查找 */
-        hashmap_entry_by_key(g_cycle.hashmap, "null", (void **)&l);
+        hashmap_entry_by_key(g_cycle.hashmap, "null", &l);
         if (NULL == l)
         {
             return;
@@ -902,17 +903,15 @@ void process_pkt(unsigned char* arg, const struct pcap_pkthdr* pkthdr, const uns
         return;
     }
 
-    //收集数据，UDP实时返回指定服务器
-	if(rule->type == REDIRECT_TYPE_RECORD)
-	{
-        ip_buf_ntos(req->saddr_str, ntohl(ip->ip_src.s_addr));
-        ip_buf_ntos(req->daddr_str, ntohl(ip->ip_dst.s_addr));
-		dcenter_udp_packet(req);
-
-	    return;
-	}
-
 #ifndef ENABLE_STAT_ONLY
+    //收集数据，UDP实时返回指定服务器
+    if(rule->type_repled == REDIRECT_TYPE_RECORD)
+    {
+        dcenter_udp_packet(ip_hdr, req);
+
+        return;
+    }
+
     /* 生成替换后的链接*/
     rtn = build_url_repled(resp->index, rule, req->url, resp->url);
     if(IPTRAFFIC_FUNC_ERROR == rtn)

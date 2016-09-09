@@ -186,6 +186,7 @@ static void add_src_page(struct cycle_s *c, char *line)
 static void free_rules(struct list_s *l)
 {
     struct list_s *p = l;
+    unsigned int i = 0;
     while(p)
     {
         struct rule_entry_s *rule = (struct rule_entry_s *)p->entry;
@@ -193,6 +194,14 @@ static void free_rules(struct list_s *l)
         regfree(&rule->reg_referer);
         regfree(&rule->reg_agent);
         regfree(&rule->reg_src_page);
+        FREE(rule->referer);
+        FREE(rule->agent);
+        FREE(rule->src_page);
+        FREE(rule->agent);
+        for (i = 0; i<rule->percent; i++)
+        {
+            FREE(rule->dest_pages[i]);
+        }
         FREE(rule->dest_pages);
         FREE(rule);
 
@@ -423,9 +432,7 @@ parse_line (struct cycle_s *c, char *line)
         }
         else if(STREQ(p, "szport="))
         {
-        	int port = 0;
-            sscanf(p, "szport=%d", &port); 
-			c->szport = port;
+            sscanf(p, "szport=%d", &(c->szport));
             break;
         }		
         else
@@ -495,13 +502,9 @@ void init_cycle(struct cycle_s *c)
 
     /* 快速匹配的hash表 */
     c->hashmap = hashmap_create(MAX_BUCKETS);
-
-	/* init buffer */
-    c->length = 0;
-	c->buffer = (char*)MALLOC(char, MAX_PACKET_LEN);
     
     /* init dcenter socket */
-	c->szhost = (char *)MALLOC(char, 32);
+	c->szhost = NULL;
     c->sock_fd = 0;  	
 }
 
@@ -510,13 +513,18 @@ void uninit_cycle(struct cycle_s *c)
     if(!c)
         return;
 
-    free_buf(c->pidlist_filename);
+    FREE(c->iptraffic_filename);
+    FREE(c->recv_device);
+    FREE(c->dest_mac);
+    FREE(c->pidlist_filename);
+    FREE(c->whitelist_filename);
+    FREE(c->bpf);
 
-      if(c->rule_list)
-      {
-          free_rules(c->rule_list);
-          clear_list(c->rule_list);
-      }
+    if(c->rule_list)
+    {
+      free_rules(c->rule_list);
+      clear_list(c->rule_list);
+    }
 
     if(c->request)
         http_free_request(c->request);
@@ -533,6 +541,8 @@ void uninit_cycle(struct cycle_s *c)
 
     if(c->hashmap)
         hashmap_delete(c->hashmap);
+
+    FREE(c->szhost);
 }
 
 void show_settings(void)
@@ -610,6 +620,9 @@ void load_hashmap()
 {
     struct list_s *p = g_cycle.rule_list;
     hashmap_t hash = g_cycle.hashmap;
+    struct rule_entry_s *rule = NULL;
+    char *index = NULL;
+    char *buf = NULL;
     
     /* 没有任何策略 */
     if(!p)
@@ -618,9 +631,9 @@ void load_hashmap()
     while(p)
     {
         /* 忽略percent之和为零的规则节点 */
-        struct rule_entry_s *rule = (struct rule_entry_s *)p->entry;
+        rule = (struct rule_entry_s *)p->entry;
 #ifndef ENABLE_STAT_ONLY
-        if((rule->percent == 0)||(rule->type==-1)||(strlen(p->index)<=0)||(strlen(rule->src_page)<=0))
+        if((rule->type_repled != REDIRECT_TYPE_RECORD && rule->percent == 0)||(rule->type==-1)||(strlen(p->index)<=0)||(strlen(rule->src_page)<=0))
 #else
         if((rule->type==-1)||(strlen(p->index)<=0)||(strlen(rule->src_page)<=0))
 #endif
@@ -632,8 +645,7 @@ void load_hashmap()
         /* 开始处理有效规则，拆分->插入新链表 */
         if(p->index && (strlen(p->index)>0))
         {
-            char *index = NULL;
-            char *buf = strdup(p->index);
+            buf = p->index;
         
             while((index=strtok(buf,"|"))!=NULL)
             {
@@ -643,7 +655,7 @@ void load_hashmap()
                 node->index = strdup(index);
                 node->entry = p->entry;
 
-				hashmap_insert(hash, node->index, node, sizeof(Node));
+				hashmap_insert(hash, node->index, node);
                 
                 buf = NULL;
             }
@@ -696,8 +708,8 @@ int main(int argc, char* argv[])
 
     /* STEP2:初始化主结构 */
     init_cycle(&g_cycle);
-    g_cycle.iptraffic_filename = strdup(configfile);
-    g_cycle.recv_device = strdup(recv_dev);
+    g_cycle.iptraffic_filename = configfile;
+    g_cycle.recv_device = recv_dev;
 
     /* STEP3: 读取配置文件->主结构 */
     read_config_file(&g_cycle, configfile);
@@ -740,6 +752,7 @@ int main(int argc, char* argv[])
     capture_pcap();
 
     close_log();
+    FREE(logfile);
     uninit_cycle(&g_cycle);
     close_pcap();
     close_libnet();

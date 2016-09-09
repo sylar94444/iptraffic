@@ -2,6 +2,7 @@
 #define __HASH_H__
 
 #include "sysdef.h"
+#include "list.h"
 
 typedef int hashmap_iter;
 
@@ -14,8 +15,7 @@ typedef int hashmap_iter;
 */
 struct hashentry_s {
     char *key;
-    void *data;
-    size_t len;
+    pNode data;
 
     struct hashentry_s *prev, *next;
 };
@@ -60,44 +60,7 @@ int hashmap_delete(hashmap_t map);
  * Returns: negative on error
  *          0 upon successful insert
  */
-int hashmap_insert(hashmap_t map, const char *key,
-                           const void *data, size_t len);
-
-/*
- * Get an iterator to the first entry.
- *
- * Returns: an negative value upon error.
- */
-hashmap_iter hashmap_first(hashmap_t map);
-
-/*
- * Checks to see if the iterator is pointing at the "end" of the entries.
- *
- * Returns: 1 if it is the end
- *          0 otherwise
- */
-int hashmap_is_end(hashmap_t map, hashmap_iter iter);
-
-/*
- * Return a "pointer" to the first instance of the particular key.  It can
- * be tested against hashmap_is_end() to see if the key was not found.
- *
- * Returns: negative upon an error
- *          an "iterator" pointing at the first key
- *          an "end-iterator" if the key wasn't found
- */
-hashmap_iter hashmap_find(hashmap_t map, const char *key);
-
-/*
- * Retrieve the key/data associated with a particular iterator.
- * NOTE: These are pointers to the actual data, so don't mess around with them
- *       too much.
- *
- * Returns: the length of the data block upon success
- *          negative upon error
- */
-ssize_t hashmap_return_entry(hashmap_t map, hashmap_iter iter,
-                                     char **key, void **data);
+int hashmap_insert(hashmap_t map, const char *key, pNode data);
 
 /*
  * Get the first entry (assuming there is more than one) for a particular
@@ -108,18 +71,7 @@ ssize_t hashmap_return_entry(hashmap_t map, hashmap_iter iter,
  *          length of data for the entry
  */
 ssize_t hashmap_entry_by_key(hashmap_t map, const char *key,
-                                     void **data);
-
-/*
- * Searches for _any_ occurrances of "key" within the hashmap and returns the
- * number of matching entries.
- *
- * Returns: negative upon an error
- *          zero if no key is found
- *          count found (positive value)
- */
-ssize_t hashmap_search(hashmap_t map, const char *key);
-
+                                     pNode *data);
 /*
  * Go through the hashmap and remove the particular key.
  * NOTE: This will invalidate any iterators which have been created.

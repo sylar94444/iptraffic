@@ -13,8 +13,6 @@
 
 #define MAX_BUCKETS 65536         /* HASH表的最大映射个数 */
 #define MAX_REGEX_SUBSLEN 100    /* 正则表达式匹配的标记 */
-/* max packet length */
-#define MAX_PACKET_LEN 4096
 
 /* 请求包匹配规则 */
 typedef struct rule_entry_s {
@@ -108,10 +106,6 @@ struct cycle_s {
 
     /* 快速匹配的hash表 */
     hashmap_t hashmap;
-
-	/* 收集数据用的缓冲区 */
-	char* buffer;
-    unsigned int length;
 
 	/* 发送数据的socet fd */	    
     int szport;

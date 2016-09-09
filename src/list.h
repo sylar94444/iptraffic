@@ -19,9 +19,11 @@ void insert_tail_list(struct list_s *l, pNode node);
 void print_list_by_index(struct list_s *l);
 
 void clear_list(struct list_s *l);
+#if 0
 
 pNode rebuild_list_by_index(struct list_s *l);
 
 void sort_list_by_index(struct list_s *l);
+#endif
 
 #endif

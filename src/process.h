@@ -104,9 +104,6 @@ typedef struct http_request_s {
     
   char* user_agent;
   unsigned int user_agent_len;
-
-  char*	saddr_str;
-  char*	daddr_str;
 }http_request_t;
 
 typedef struct http_response_s {
