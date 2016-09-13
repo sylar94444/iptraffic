@@ -738,7 +738,8 @@ struct rule_entry_s * match_rules_repled(struct http_request_s* r, struct list_s
 
 #ifndef ENABLE_STAT_ONLY
         resp->index = RANDOM_NUM;
-        if(resp->index >= rule->percent)
+        // 如果是REDIRECT_TYPE_RECORD的情况，则不需要匹配概率
+        if(resp->index >= rule->percent && rule->type_repled != REDIRECT_TYPE_RECORD)
         {
             return NULL;
         }
